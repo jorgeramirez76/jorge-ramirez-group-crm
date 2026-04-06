@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,134 +53,36 @@ const TYPE_COLORS: Record<ContactType, string> = {
   Referral: "bg-pink-500/20 text-pink-400 border-pink-500/50",
 };
 
-const MOCK_CONTACTS: Contact[] = [
-  {
-    id: "c1",
-    name: "Sarah Chen",
-    type: "Buyer",
-    stage: "Appt Booked",
-    phone: "(732) 555-0142",
-    email: "sarah.chen@gmail.com",
-    lastActivity: "2h ago",
-    assignedTo: "Jorge",
-    notes: "Looking for 3BR in Edison. Pre-approved $550K.",
-    address: "Edison, NJ",
-  },
-  {
-    id: "c2",
-    name: "Michael Torres",
-    type: "FSBO",
-    stage: "New",
-    phone: "(908) 555-0287",
-    email: "mtorres@outlook.com",
-    lastActivity: "15m ago",
-    assignedTo: "AI",
-    notes: "Listed 45 Oak Ridge Rd FSBO for 3 weeks. No showings.",
-    address: "45 Oak Ridge Rd, Summit, NJ",
-  },
-  {
-    id: "c3",
-    name: "Lisa Park",
-    type: "Seller",
-    stage: "Active Client",
-    phone: "(201) 555-0193",
-    email: "lisa.park@yahoo.com",
-    lastActivity: "1h ago",
-    assignedTo: "Jorge",
-    notes: "Listing at 12 Maple St. Open house this Saturday.",
-    address: "12 Maple St, Ridgewood, NJ",
-  },
-  {
-    id: "c4",
-    name: "James Wilson",
-    type: "Buyer",
-    stage: "Hot",
-    phone: "(973) 555-0321",
-    email: "jwilson@gmail.com",
-    lastActivity: "3h ago",
-    assignedTo: "Jorge",
-    notes: "Made offer on 88 Elm Dr. Waiting for response.",
-    address: "Montclair, NJ",
-  },
-  {
-    id: "c5",
-    name: "Priya Sharma",
-    type: "Buyer",
-    stage: "Warm",
-    phone: "(732) 555-0455",
-    email: "priya.s@gmail.com",
-    lastActivity: "1d ago",
-    assignedTo: "AI",
-    notes: "Relocating from NYC. Looking in Woodbridge/Edison area.",
-    address: "Woodbridge, NJ",
-  },
-  {
-    id: "c6",
-    name: "David Kim",
-    type: "Investor",
-    stage: "Nurture",
-    phone: "(201) 555-0678",
-    email: "dkim.invest@gmail.com",
-    lastActivity: "3d ago",
-    assignedTo: "AI",
-    notes: "Interested in multi-family properties. Budget $800K-1.2M.",
-  },
-  {
-    id: "c7",
-    name: "Angela Rodriguez",
-    type: "Seller",
-    stage: "Under Contract",
-    phone: "(908) 555-0812",
-    email: "angela.r@hotmail.com",
-    lastActivity: "5h ago",
-    assignedTo: "Jorge",
-    notes: "Under contract at 22 Pine Ave. Closing April 15.",
-    address: "22 Pine Ave, Westfield, NJ",
-  },
-  {
-    id: "c8",
-    name: "Tom Bradley",
-    type: "Expired",
-    stage: "Cold",
-    phone: "(732) 555-0934",
-    email: "tombradley@aol.com",
-    lastActivity: "5d ago",
-    assignedTo: "AI",
-    notes: "Listing expired 2 weeks ago. 67 River Rd.",
-    address: "67 River Rd, New Brunswick, NJ",
-  },
-  {
-    id: "c9",
-    name: "Nina Patel",
-    type: "Referral",
-    stage: "Warm",
-    phone: "(973) 555-1045",
-    email: "nina.patel@gmail.com",
-    lastActivity: "2d ago",
-    assignedTo: "Jorge",
-    notes: "Referred by James Wilson. First-time buyer.",
-  },
-  {
-    id: "c10",
-    name: "Robert Chang",
-    type: "Buyer",
-    stage: "Appt Booked",
-    phone: "(201) 555-1167",
-    email: "rchang@gmail.com",
-    lastActivity: "4h ago",
-    assignedTo: "Jorge",
-    notes: "Looking for 4BR in Bergen County. Budget $750K.",
-    address: "Bergen County, NJ",
-  },
-];
-
 export default function ContactsPage() {
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterStage, setFilterStage] = useState<PipelineStage | "All">("All");
   const [filterType, setFilterType] = useState<ContactType | "All">("All");
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  const filtered = MOCK_CONTACTS.filter((c) => {
+  useEffect(() => {
+    async function fetchContacts() {
+      try {
+        setLoading(true);
+        const resp = await fetch("/api/contacts");
+        if (!resp.ok) throw new Error(`Failed to fetch: ${resp.status}`);
+        const data = await resp.json();
+        setContacts(data.contacts || []);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching contacts:", err);
+        setError("Failed to load contacts from CRM");
+        setContacts([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchContacts();
+  }, []);
+
+  const filtered = contacts.filter((c) => {
     const matchSearch =
       !search ||
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -257,7 +159,7 @@ export default function ContactsPage() {
             <div>
               <h2 className="text-2xl font-bold text-white">Contacts</h2>
               <p className="text-zinc-400">
-                {MOCK_CONTACTS.length} total contacts &middot; {filtered.length} showing
+                {loading ? "Loading..." : `${contacts.length} total contacts`} &middot; {filtered.length} showing
               </p>
             </div>
             <Button className="bg-blue-600 hover:bg-blue-700">+ Add Contact</Button>
@@ -314,6 +216,12 @@ export default function ContactsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="flex gap-6">
             {/* Table */}
@@ -379,10 +287,17 @@ export default function ContactsPage() {
                           </td>
                         </tr>
                       ))}
-                      {filtered.length === 0 && (
+                      {loading && (
                         <tr>
                           <td colSpan={7} className="p-8 text-center text-zinc-500">
-                            No contacts match your filters
+                            Loading contacts from CRM...
+                          </td>
+                        </tr>
+                      )}
+                      {!loading && filtered.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-zinc-500">
+                            {error ? "Could not load contacts" : "No contacts match your filters"}
                           </td>
                         </tr>
                       )}

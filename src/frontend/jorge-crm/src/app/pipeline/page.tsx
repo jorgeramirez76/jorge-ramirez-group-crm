@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,41 +50,43 @@ const TYPE_COLORS: Record<ContactType, string> = {
   Referral: "bg-pink-500/20 text-pink-400 border-pink-500/50",
 };
 
-const PIPELINE_DATA: Record<PipelineStage, PipelineCard[]> = {
-  New: [
-    { id: "c2", name: "Michael Torres", type: "FSBO", lastActivity: "15m ago", detail: "45 Oak Ridge Rd, Summit" },
-    { id: "n1", name: "Jennifer Lee", type: "Buyer", lastActivity: "1h ago", detail: "Zillow lead, Edison area" },
-    { id: "n2", name: "Carlos Mendez", type: "Seller", lastActivity: "2h ago", detail: "Wants CMA for 18 Birch Ln" },
-  ],
-  Nurture: [
-    { id: "c6", name: "David Kim", type: "Investor", lastActivity: "3d ago", detail: "Multi-family, $800K-1.2M" },
-    { id: "nu1", name: "Samantha Wright", type: "Buyer", lastActivity: "4d ago", detail: "Pre-approval in progress" },
-  ],
-  Cold: [
-    { id: "c8", name: "Tom Bradley", type: "Expired", lastActivity: "5d ago", detail: "67 River Rd, New Brunswick" },
-    { id: "co1", name: "Patricia Gomez", type: "Seller", lastActivity: "7d ago", detail: "Not responding to follow-ups" },
-  ],
-  Warm: [
-    { id: "c5", name: "Priya Sharma", type: "Buyer", lastActivity: "1d ago", detail: "Relocating from NYC" },
-    { id: "c9", name: "Nina Patel", type: "Referral", lastActivity: "2d ago", detail: "First-time buyer, referred by James" },
-  ],
-  Hot: [
-    { id: "c4", name: "James Wilson", type: "Buyer", lastActivity: "3h ago", detail: "Offer pending on 88 Elm Dr" },
-  ],
-  "Appt Booked": [
-    { id: "c1", name: "Sarah Chen", type: "Buyer", lastActivity: "2h ago", detail: "Discovery call tomorrow 9am" },
-    { id: "c10", name: "Robert Chang", type: "Buyer", lastActivity: "4h ago", detail: "Private tour Friday 11am" },
-  ],
-  "Active Client": [
-    { id: "c3", name: "Lisa Park", type: "Seller", lastActivity: "1h ago", detail: "12 Maple St, open house Sat" },
-  ],
-  "Under Contract": [
-    { id: "c7", name: "Angela Rodriguez", type: "Seller", lastActivity: "5h ago", detail: "22 Pine Ave, closing Apr 15" },
-  ],
+const EMPTY_PIPELINE: Record<PipelineStage, PipelineCard[]> = {
+  New: [],
+  Nurture: [],
+  Cold: [],
+  Warm: [],
+  Hot: [],
+  "Appt Booked": [],
+  "Active Client": [],
+  "Under Contract": [],
 };
 
 export default function PipelinePage() {
-  const totalLeads = Object.values(PIPELINE_DATA).flat().length;
+  const [pipelineData, setPipelineData] = useState<Record<string, PipelineCard[]>>(EMPTY_PIPELINE);
+  const [totalLeads, setTotalLeads] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPipeline() {
+      try {
+        setLoading(true);
+        const resp = await fetch("/api/pipeline");
+        if (!resp.ok) throw new Error(`Failed to fetch: ${resp.status}`);
+        const data = await resp.json();
+        setPipelineData({ ...EMPTY_PIPELINE, ...(data.pipeline || {}) });
+        setTotalLeads(data.totalLeads || 0);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching pipeline:", err);
+        setError("Failed to load pipeline from CRM");
+        setPipelineData(EMPTY_PIPELINE);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPipeline();
+  }, []);
 
   return (
     <div className="flex min-h-screen">
@@ -128,7 +131,9 @@ export default function PipelinePage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-white">Pipeline</h2>
-              <p className="text-zinc-400">{totalLeads} leads across all stages</p>
+              <p className="text-zinc-400">
+                {loading ? "Loading pipeline..." : `${totalLeads} leads across all stages`}
+              </p>
             </div>
             <div className="flex gap-3">
               <Link href="/contacts">
@@ -140,10 +145,16 @@ export default function PipelinePage() {
             </div>
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Kanban Board */}
           <div className="flex gap-4 overflow-x-auto pb-4">
             {STAGE_CONFIG.map(({ stage, color, headerBg }) => {
-              const cards = PIPELINE_DATA[stage];
+              const cards = pipelineData[stage] || [];
               return (
                 <div key={stage} className="min-w-[260px] w-[260px] shrink-0 flex flex-col">
                   {/* Column Header */}
@@ -206,7 +217,7 @@ export default function PipelinePage() {
                     <div key={stage} className="flex items-center gap-1.5">
                       <div className={`w-2 h-2 rounded-full ${color}`} />
                       <span className="text-xs text-zinc-400">
-                        {stage}: <strong className="text-white">{PIPELINE_DATA[stage].length}</strong>
+                        {stage}: <strong className="text-white">{(pipelineData[stage] || []).length}</strong>
                       </span>
                     </div>
                   ))}

@@ -68,9 +68,9 @@ async def send_email(request: Request):
     # Append compliance footer (CAN-SPAM, NJ real estate law, NAR/NCJAR)
     compliance_footer = (
         "\n\n---\n"
-        "The Jorge Ramirez Group | Keller Williams Premier Properties\n"
-        "George Ramirez, Licensed Real Estate Broker-Salesperson\n"
-        "Summit, NJ 07901\n\n"
+        "The Jorge Ramirez Group | Keller Williams Realty Premier Properties\n"
+        "Jorge Ramirez, Licensed Real Estate Salesperson\n"
+        "488 Springfield Avenue, Summit, NJ 07901\n\n"
         "If you no longer wish to receive emails, reply STOP or click unsubscribe.\n"
         "This is not intended to solicit currently listed properties. "
         "If you are currently working with a real estate professional, please disregard this message."

@@ -3,8 +3,8 @@ COMPLIANCE FOOTER (appended to all outbound emails)
 ---
 
 The Jorge Ramirez Group | Keller Williams Premier Properties
-George Ramirez, Licensed Real Estate Broker-Salesperson | NJ License #XXXXXXX
-123 Main Street, Summit, NJ 07901
+Jorge Ramirez, Licensed Real Estate Salesperson
+488 Springfield Avenue, Summit, NJ 07901
 
 If you no longer wish to receive emails from us, reply STOP or click here to unsubscribe: {unsubscribe_link}
 
