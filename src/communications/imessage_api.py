@@ -20,7 +20,7 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from imessage_sender import MessageResult, MessageStatus, send_message
+from .imessage_sender import MessageResult, MessageStatus, send_message
 
 # ---------------------------------------------------------------------------
 # Configuration via environment variables

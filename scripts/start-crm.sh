@@ -76,7 +76,7 @@ echo "[6/6] Verifying services..."
 sleep 5
 
 SERVICES_OK=0
-for port_name in "3000:Twenty CRM" "3333:Dashboard" "5678:n8n" "4100:Chatwoot" "8000:Connector" "8100:SMS" "8200:Email" "11434:Ollama"; do
+for port_name in "3000:Twenty CRM" "3333:Dashboard" "5678:n8n" "4100:Chatwoot" "8000:Connector" "8100:SMS" "8200:Email" "8300:iMessage" "8400:Contracts" "11434:Ollama"; do
     port="${port_name%%:*}"
     name="${port_name##*:}"
     if curl -s -o /dev/null http://localhost:$port 2>/dev/null; then

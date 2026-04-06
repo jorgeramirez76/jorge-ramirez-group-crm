@@ -67,7 +67,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8100/api/sms/send",
+        "url": "http://host.docker.internal:8100/api/sms/send",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ to: $json.agent_phone, message: 'Hey George, how did the ' + $json.appointment_type + ' appointment with ' + $json.lead_name + ' go? Reply:\\n1 = Signed\\n2 = Reschedule\\n3 = Not interested\\n4 = Need more time' }) }}",

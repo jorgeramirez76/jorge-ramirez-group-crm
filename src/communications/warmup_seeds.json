@@ -1,0 +1,30 @@
+{
+  "_comment": "Seed emails for warm-up. These should be friendly addresses (team members, friends, partners) that will open and reply to emails, boosting sender reputation. Copy this file to warmup_seeds.json and fill in real addresses.",
+  "seeds": [
+    {
+      "email": "teammate1@example.com",
+      "first_name": "Alice",
+      "note": "Team member - will open and reply"
+    },
+    {
+      "email": "teammate2@example.com",
+      "first_name": "Bob",
+      "note": "Team member - will open and reply"
+    },
+    {
+      "email": "friend1@gmail.com",
+      "first_name": "Carol",
+      "note": "Friend - agreed to participate in warm-up"
+    },
+    {
+      "email": "friend2@yahoo.com",
+      "first_name": "Dave",
+      "note": "Friend - agreed to participate in warm-up"
+    },
+    {
+      "email": "partner@realestate-partner.com",
+      "first_name": "Eve",
+      "note": "Industry partner - will engage with emails"
+    }
+  ]
+}

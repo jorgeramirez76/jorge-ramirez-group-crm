@@ -50,7 +50,7 @@ DB_CONFIG = {
 }
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:27b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma4:31b")
 
 OUTPUT_DIR = Path(os.getenv("OUTPUT_DIR", "/Users/teddy/GPT-SoVITS/src/ai/output"))
 

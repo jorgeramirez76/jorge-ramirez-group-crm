@@ -124,10 +124,15 @@ async def send_sequence_email(request: Request):
     subject = personalize(email.get("subject", ""), lead)
     body = personalize(email.get("body", ""), lead)
 
-    # Reuse the send endpoint
-    return await send_email(Request(scope=request.scope), json={
-        "to": to, "subject": subject, "body": body, "lead": lead
-    })
+    # Send directly using the same logic as send_email
+    from starlette.requests import Request as StarletteRequest
+    from starlette.datastructures import State
+
+    class FakeRequest:
+        async def json(self):
+            return {"to": to, "subject": subject, "body": body, "lead": lead}
+
+    return await send_email(FakeRequest())
 
 
 @app.get("/api/email/sequences")

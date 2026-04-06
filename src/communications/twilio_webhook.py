@@ -17,7 +17,7 @@ app = FastAPI(title="Twilio SMS Bridge", version="1.0.0")
 
 CHATWOOT_URL = os.getenv("CHATWOOT_URL", "http://localhost:4100")
 CHATWOOT_API_TOKEN = os.getenv("CHATWOOT_API_TOKEN", "")
-CHATWOOT_ACCOUNT_ID = os.getenv("CHATWOOT_ACCOUNT_ID", "1")
+CHATWOOT_ACCOUNT_ID = os.getenv("CHATWOOT_ACCOUNT_ID", "2")
 CHATWOOT_INBOX_ID = os.getenv("CHATWOOT_INBOX_ID", "1")
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")

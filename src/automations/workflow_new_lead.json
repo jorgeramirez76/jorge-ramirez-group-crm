@@ -18,7 +18,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:11434/api/chat",
+        "url": "http://host.docker.internal:11434/api/chat",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ model: 'gemma4:31b', messages: [ { role: 'system', content: 'You are a real estate lead classification assistant. Given the lead source and data, classify the lead temperature as exactly one of: hot, warm, cold. Respond with ONLY the single word: hot, warm, or cold.' }, { role: 'user', content: 'Classify this lead:\\nName: ' + $json.body.name + '\\nEmail: ' + $json.body.email + '\\nPhone: ' + $json.body.phone + '\\nLead Type: ' + $json.body.lead_type + '\\nSource: ' + $json.body.source } ], stream: false }) }}",
@@ -114,7 +114,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8100/api/sms/send",
+        "url": "http://host.docker.internal:8100/api/sms/send",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ to: $json.lead_phone, message: 'Hi ' + $json.lead_name + '! This is Teddy from George Ramirez\\'s real estate team. Thanks for reaching out! George is one of the top agents in the area and we\\'d love to help you. Are you available for a quick call in the next 15 minutes?' }) }}",
@@ -129,7 +129,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8200/api/email/send",
+        "url": "http://host.docker.internal:8200/api/email/send",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ to: $json.lead_email, subject: 'Welcome! George Ramirez Real Estate Team', body: 'Hi ' + $json.lead_name + ',\\n\\nThank you for your interest! I\\'m Teddy, George Ramirez\\'s assistant. George is excited to help you with your ' + $json.lead_type + ' needs.\\n\\nAs a hot lead, we\\'re prioritizing your request. Expect a call from George within the next 15 minutes.\\n\\nIn the meantime, feel free to reply to this email with any questions.\\n\\nBest,\\nTeddy\\nGeorge Ramirez Real Estate Team' }) }}",
@@ -144,7 +144,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8100/api/sms/send",
+        "url": "http://host.docker.internal:8100/api/sms/send",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ to: $json.lead_phone, message: 'Hi ' + $json.lead_name + '! This is Teddy from George Ramirez\\'s real estate team. Thanks for your interest! We\\'d love to learn more about what you\\'re looking for. When would be a good time for a quick chat?' }) }}",
@@ -159,7 +159,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8200/api/email/send",
+        "url": "http://host.docker.internal:8200/api/email/send",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ to: $json.lead_email, subject: 'Thanks for Your Interest - George Ramirez Real Estate', body: 'Hi ' + $json.lead_name + ',\\n\\nThank you for reaching out! I\\'m Teddy, George Ramirez\\'s assistant.\\n\\nWe received your inquiry about ' + $json.lead_type + ' and would love to help. George has deep expertise in the local market and is ready to assist when you are.\\n\\nFeel free to reply to this email or give us a call anytime.\\n\\nBest,\\nTeddy\\nGeorge Ramirez Real Estate Team' }) }}",

@@ -29,7 +29,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://localhost:8100/api/sms/send",
+        "url": "http://host.docker.internal:8100/api/sms/send",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ to: $('Webhook - Missed Call').item.json.body.from_number, from: $('Webhook - Missed Call').item.json.body.to_number, message: \"Hey, this is Teddy from George Ramirez's team. Looks like we just missed your call \\u2014 is now a good time to chat or would you prefer I call back at a specific time?\" }) }}",
