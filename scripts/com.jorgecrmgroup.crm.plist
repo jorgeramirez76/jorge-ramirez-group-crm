@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jorgeramirezgroup.crm</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/teddy/GPT-SoVITS/scripts/start-crm.sh</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/tmp/jorge-crm-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/jorge-crm-stderr.log</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/teddy/GPT-SoVITS</string>
+</dict>
+</plist>

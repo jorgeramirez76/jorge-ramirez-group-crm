@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.env
+.env.local
+*.pth
+*.ckpt
+__pycache__/
+*.pyc
+/data/contracts/
+/src/ai/output/
+/src/frontend/jorge-crm/node_modules/
+/src/frontend/jorge-crm/.next/
+/src/video/jorge-videos/node_modules/

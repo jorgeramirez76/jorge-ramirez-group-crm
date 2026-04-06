@@ -1,0 +1,106 @@
+{
+  "name": "Missed Call Text-Back",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "missed-call",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "b1b2c3d4-0002-4000-8000-000000000001",
+      "name": "Webhook - Missed Call",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "missed-call-textback"
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "b1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Wait 30 Seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8100/api/sms/send",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Webhook - Missed Call').item.json.body.from_number, from: $('Webhook - Missed Call').item.json.body.to_number, message: \"Hey, this is Teddy from George Ramirez's team. Looks like we just missed your call \\u2014 is now a good time to chat or would you prefer I call back at a specific time?\" }) }}",
+        "options": {}
+      },
+      "id": "b1b2c3d4-0002-4000-8000-000000000003",
+      "name": "SMS - Text Back",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Missed call text-back sent', to: $('Webhook - Missed Call').item.json.body.from_number }) }}",
+        "options": {}
+      },
+      "id": "b1b2c3d4-0002-4000-8000-000000000004",
+      "name": "Respond - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [940, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Missed Call": {
+      "main": [
+        [
+          {
+            "node": "Wait 30 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 30 Seconds": {
+      "main": [
+        [
+          {
+            "node": "SMS - Text Back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMS - Text Back": {
+      "main": [
+        [
+          {
+            "node": "Respond - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "real-estate-crm"
+    },
+    {
+      "name": "missed-call"
+    }
+  ],
+  "triggerCount": 1,
+  "pinData": {}
+}

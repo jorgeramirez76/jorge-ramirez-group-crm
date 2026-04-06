@@ -1,0 +1,167 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL — Shared database for CRM services
+  # ============================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: crm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: crm_local_dev
+      POSTGRES_DB: twenty
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Redis — Cache and message queue
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: crm-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Twenty CRM — Contact management, pipelines
+  # ============================================
+  twenty-server:
+    image: twentycrm/twenty:latest
+    container_name: crm-twenty-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      PG_DATABASE_URL: postgres://crm:crm_local_dev@postgres:5432/twenty
+      REDIS_URL: redis://redis:6379
+      SERVER_URL: http://localhost:3000
+      FRONT_BASE_URL: http://localhost:3001
+      SIGN_IN_PREFILLED: "true"
+      APP_SECRET: jorge-crm-app-secret-2026-a7b3c9d2e1f4
+      ACCESS_TOKEN_SECRET: jorge-crm-access-token-secret-2026
+      LOGIN_TOKEN_SECRET: jorge-crm-login-token-secret-2026
+      REFRESH_TOKEN_SECRET: jorge-crm-refresh-token-secret-2026
+      FILE_TOKEN_SECRET: jorge-crm-file-token-secret-2026
+    ports:
+      - "3000:3000"
+
+  twenty-front:
+    image: twentycrm/twenty-front:latest
+    container_name: crm-twenty-front
+    restart: unless-stopped
+    depends_on:
+      - twenty-server
+    environment:
+      REACT_APP_SERVER_BASE_URL: http://localhost:3000
+    ports:
+      - "3001:3000"
+
+  # ============================================
+  # n8n — Workflow automation engine
+  # ============================================
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: crm-n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: crm
+      DB_POSTGRESDB_PASSWORD: crm_local_dev
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: admin
+      N8N_BASIC_AUTH_PASSWORD: jorge2026
+      N8N_LICENSE_KEY: f0e1d560-484f-42df-b0d9-7cb4c83e7650
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  # ============================================
+  # Chatwoot — Unified messaging inbox
+  # ============================================
+  chatwoot-web:
+    image: chatwoot/chatwoot:latest
+    container_name: crm-chatwoot
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      SECRET_KEY_BASE: jorge_crm_chatwoot_secret_key_base_2026_random_string_here
+      FRONTEND_URL: http://localhost:4100
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: chatwoot
+      POSTGRES_USERNAME: crm
+      POSTGRES_PASSWORD: crm_local_dev
+      REDIS_URL: redis://redis:6379
+      RAILS_LOG_TO_STDOUT: "true"
+    ports:
+      - "4100:3000"
+    volumes:
+      - chatwoot_data:/app/storage
+    command: bundle exec rails s -b 0.0.0.0
+
+  chatwoot-sidekiq:
+    image: chatwoot/chatwoot:latest
+    container_name: crm-chatwoot-sidekiq
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      SECRET_KEY_BASE: jorge_crm_chatwoot_secret_key_base_2026_random_string_here
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: chatwoot
+      POSTGRES_USERNAME: crm
+      POSTGRES_PASSWORD: crm_local_dev
+      REDIS_URL: redis://redis:6379
+    command: bundle exec sidekiq -C config/sidekiq.yml
+
+  # Cal.com runs natively (no ARM Docker image available)
+  # Start with: cd src/calendar/cal.com && npm start
+
+volumes:
+  postgres_data:
+  redis_data:
+  n8n_data:
+  chatwoot_data:

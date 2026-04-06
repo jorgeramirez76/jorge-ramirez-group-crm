@@ -1,0 +1,190 @@
+name: jorge-crm-build
+description: Build full real estate CRM replacing GoHighLevel
+version: "1.0.0"
+
+phases:
+  - name: infrastructure
+    parallel: true
+    tasks:
+      - id: install-twenty
+        agent: development
+        tier: fast
+        description: |
+          Install Twenty CRM via Docker on localhost.
+          Configure PostgreSQL database.
+          Set up with custom real estate pipelines:
+            - Lead Pipeline: New → Nurture → Cold → Warm → Hot → Appointment Booked → Potential Client → Active Client → Under Contract → Closed
+            - Buyer Transaction Pipeline
+            - Listing Transaction Pipeline
+          Add custom fields for: lead type, buyer preferences (price, bedrooms, areas), seller info, property address.
+          Add lead types: Buyer, Seller, FSBO, Expired, Past Client, Sphere, Referral, Landlord, Investor, Renter.
+
+      - id: install-calcom
+        agent: development
+        tier: fast
+        description: |
+          Install Cal.com via Docker on localhost.
+          Configure 5 calendar types:
+            1. Discovery Call / Phone Consultation
+            2. Listing Consultation
+            3. Private Property Tour
+            4. Buyer Consultation (Home Goals)
+            5. Agent Internal Appointments (used by AI)
+          Set up Google Calendar sync.
+          Create custom booking forms with conditional logic.
+          Configure automated email/text reminders.
+
+      - id: install-n8n
+        agent: development
+        tier: fast
+        description: |
+          Install n8n workflow automation via Docker on localhost.
+          Configure webhook endpoints for CRM events.
+          Set up Ollama integration for AI-powered automation steps.
+          Create base workflow templates for real estate automations.
+
+      - id: install-chatwoot
+        agent: development
+        tier: fast
+        description: |
+          Install Chatwoot unified inbox via Docker on localhost.
+          Configure channels: SMS (Twilio), Email (SMTP), Web Chat Widget.
+          Set up agent inbox and team routing.
+          Configure auto-assignment rules.
+
+  - name: ai-layer
+    depends_on: [infrastructure]
+    parallel: true
+    tasks:
+      - id: ai-follow-up-engine
+        agent: development
+        tier: smart
+        description: |
+          Build AI follow-up engine using Gemma 4 (Ollama local).
+          Reads lead data from Twenty CRM API.
+          Determines follow-up cadence based on pipeline stage:
+            - Hot: every 2-3 days
+            - Warm: weekly
+            - Cold: bi-weekly
+            - Nurture: monthly
+            - Sphere: every 2-3 months
+          Writes personalized emails/texts following Brandon Mulrenin Reverse Selling + Jeremy Miner NEPQ methodology.
+          Never hard sells. Asks questions. Uses consequence framing.
+          Sends via n8n automations through Twilio (SMS) and Resend (email).
+
+      - id: ai-appointment-booker
+        agent: development
+        tier: smart
+        description: |
+          Build AI appointment booking integration.
+          AI checks Cal.com availability via API.
+          Books appropriate calendar type based on lead type and conversation context.
+          Sends confirmation and reminder sequences.
+          Post-appointment follow-up automation with trigger links.
+
+      - id: ai-newsletter-engine
+        agent: development
+        tier: smart
+        description: |
+          Build AI newsletter writer using Gemma 4.
+          Generates weekly/bi-weekly market update newsletters.
+          Pulls local market data for Central/Northern NJ.
+          Creates content following the team's brand voice.
+          Sends via Resend email.
+
+      - id: ai-review-responder
+        agent: development
+        tier: smart
+        description: |
+          Build AI review response system.
+          Monitors Google Business Profile reviews.
+          AI writes personalized responses to each review.
+          Respectful, professional tone matching Jorge Ramirez Group brand.
+
+  - name: email-sequences
+    depends_on: [ai-layer]
+    parallel: true
+    tasks:
+      - id: write-all-email-sequences
+        agent: documentation
+        tier: smart
+        description: |
+          Write ALL email follow-up sequences following Brandon Mulrenin Reverse Selling + Jeremy Miner NEPQ methodology.
+          Each email: 1-2 paragraphs, ONE question, curious detached tone, consequence framing.
+
+          Sequences to write:
+          1. New buyer lead drip (5-7 emails)
+          2. New seller lead drip (5-7 emails)
+          3. FSBO outreach sequence (8-10 emails)
+          4. Expired listing sequence (6-8 emails)
+          5. Post-appointment follow-up
+          6. Open house follow-up (3-5 emails)
+          7. Sphere/past client nurture (ongoing monthly)
+          8. Review request after closing (2-3 emails)
+          9. Birthday/anniversary touchpoints
+          10. "Just sold in your neighborhood" emails
+          11. Home value report email template
+          12. Hot lead urgency sequence
+          13. Re-engagement sequence (gone cold)
+          14. Webinar follow-up (4-6 emails)
+
+  - name: communications
+    depends_on: [infrastructure]
+    parallel: true
+    tasks:
+      - id: twilio-sms-integration
+        agent: development
+        tier: fast
+        description: |
+          Connect Twilio to Chatwoot and n8n.
+          Enable send/receive SMS from CRM.
+          Configure Twilio webhook to Chatwoot for incoming messages.
+          Set up outbound SMS via n8n automations.
+
+      - id: imessage-integration
+        agent: development
+        tier: fast
+        description: |
+          Build iMessage sending via macOS AppleScript.
+          Create Node.js/Python wrapper that sends iMessages through Messages.app.
+          Connect to n8n for automated iMessage sending.
+          Free, blue bubble messages.
+
+      - id: email-setup
+        agent: development
+        tier: fast
+        description: |
+          Configure Resend or Amazon SES for transactional email.
+          Set up sending domain with SPF/DKIM/DMARC.
+          Connect to n8n for automated email campaigns.
+          Build email template system with drag-and-drop editor.
+
+  - name: frontend
+    depends_on: [infrastructure, ai-layer]
+    tasks:
+      - id: dashboard-app
+        agent: development
+        tier: smart
+        description: |
+          Build Next.js + shadcn/ui dashboard that ties everything together.
+          Single unified interface wrapping:
+            - Twenty CRM (contacts, pipelines, tasks)
+            - Cal.com (calendars, bookings)
+            - Chatwoot (unified inbox)
+            - n8n (automations dashboard)
+            - Analytics (leads, appointments, deals)
+          PWA configuration so it installs as a dock icon on Mac.
+          Auto-starts all backend services on launch.
+          Clean, modern UI that non-technical users can navigate easily.
+
+  - name: video-pipeline
+    depends_on: [ai-layer]
+    tasks:
+      - id: setup-video-generation
+        agent: development
+        tier: smart
+        description: |
+          Install daVinci-MagiHuman for AI avatar lip-sync video.
+          Install Remotion for video composition.
+          Build pipeline: Gemma 4 script → voice clone audio → MagiHuman video → Remotion composition.
+          Connect to n8n for automated video generation and delivery.
